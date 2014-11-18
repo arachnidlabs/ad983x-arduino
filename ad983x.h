@@ -11,12 +11,18 @@ enum SignOutput {
   SIGN_OUTPUT_COMPARATOR  = 0x0038,
 };
 
+enum OutputMode {
+  OUTPUT_MODE_SINE        = 0x0000,
+  OUTPUT_MODE_TRIANGLE    = 0x0002,
+};
+
 class AD983X {
 public:
   AD983X(byte select_pin, int frequency_mhz);
   void setFrequencyWord(byte reg, uint32_t frequency);
   void setPhaseWord(byte reg, uint32_t phase);
   void setSignOutput(SignOutput out);
+  void setOutputMode(OutputMode out);
 
   inline uint32_t computeFrequencyWord(uint32_t frequency) {
     // This is a manual expansion of (frequency * 2^28) / m_frequency_mhz

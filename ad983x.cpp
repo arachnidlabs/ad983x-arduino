@@ -45,6 +45,15 @@ void AD983X::setSignOutput(SignOutput out) {
   writeReg(m_reg);
 }
 
+void AD983X::setOutputMode(OutputMode out) {
+  if(out == OUTPUT_MODE_TRIANGLE) {
+    m_reg = (m_reg & ~SIGN_OUTPUT_MASK) | out;
+  } else {
+    m_reg &= ~REG_MODE;
+  }
+  writeReg(m_reg);
+}
+
 void AD983X::init() {
   SPI.begin();
   writeReg(m_reg);
