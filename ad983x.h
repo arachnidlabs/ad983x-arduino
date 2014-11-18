@@ -52,6 +52,8 @@ public:
   AD983X_SW(byte select_pin, int frequency_mhz);
   void reset(boolean in_reset);
   void begin();
+  void selectFrequency(byte reg);
+  void selectPhase(byte reg);
 };
 
 #endif

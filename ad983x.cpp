@@ -75,6 +75,24 @@ AD983X_SW::AD983X_SW(byte select_pin, int frequency_mhz) :
     AD983X(select_pin, frequency_mhz) {
 }
 
+void AD983X_SW::selectFrequency(byte reg) {
+  if(reg) {
+    m_reg |= REG_FSEL;
+  } else {
+    m_reg &= ~REG_FSEL;
+  }
+  writeReg(m_reg);
+}
+
+void AD983X_SW::selectPhase(byte reg) {
+  if(reg) {
+    m_reg |= REG_PSEL;
+  } else {
+    m_reg &= ~REG_PSEL;
+  }
+  writeReg(m_reg);
+}
+
 void AD983X_PIN::reset(boolean in_reset) {
   digitalWrite(m_reset_pin, in_reset);
 }
