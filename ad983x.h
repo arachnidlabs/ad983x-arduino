@@ -4,11 +4,19 @@
 #include <Arduino.h>
 #include <SPI.h>
 
+enum SignOutput {
+  SIGN_OUTPUT_NONE        = 0x0000,
+  SIGN_OUTPUT_MSB         = 0x0028,
+  SIGN_OUTPUT_MSB_2       = 0x0020,
+  SIGN_OUTPUT_COMPARATOR  = 0x0038,
+};
+
 class AD983X {
 public:
   AD983X(byte select_pin, int frequency_mhz);
   void setFrequencyWord(byte reg, uint32_t frequency);
   void setPhaseWord(byte reg, uint32_t phase);
+  void setSignOutput(SignOutput out);
 
   inline uint32_t computeFrequencyWord(uint32_t frequency) {
     // This is a manual expansion of (frequency * 2^28) / m_frequency_mhz

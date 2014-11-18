@@ -18,6 +18,7 @@
 #define REG_DIV2    0x0008
 #define REG_MODE    0x0002
 
+#define SIGN_OUTPUT_MASK (REG_OPBITEN | REG_SIGNPIB | REG_DIV2 | REG_MODE)
 
 void AD983X::writeReg(uint16_t value) {
   SPI.setBitOrder(MSBFIRST);
@@ -31,18 +32,17 @@ void AD983X::writeReg(uint16_t value) {
 }
 
 void AD983X::setFrequencyWord(byte reg, uint32_t frequency) {
-  this->writeReg((reg?REG_FREQ1:REG_FREQ0) | (frequency & 0x3FFF));
-  this->writeReg((reg?REG_FREQ1:REG_FREQ0) | ((frequency >> 14) & 0x3FFF));
+  writeReg((reg?REG_FREQ1:REG_FREQ0) | (frequency & 0x3FFF));
+  writeReg((reg?REG_FREQ1:REG_FREQ0) | ((frequency >> 14) & 0x3FFF));
 }
 
 void AD983X::setPhaseWord(byte reg, uint32_t phase) {
-  this->writeReg((reg?REG_PHASE1:REG_PHASE0) | (phase & 0x0FFF));
+  writeReg((reg?REG_PHASE1:REG_PHASE0) | (phase & 0x0FFF));
 }
 
-AD983X::AD983X(byte select_pin, int frequency_mhz) : 
-	m_select_pin(select_pin), m_frequency_mhz(frequency_mhz), m_reg(REG_B28) {
-  digitalWrite(select_pin, HIGH);
-  pinMode(select_pin, OUTPUT);
+void AD983X::setSignOutput(SignOutput out) {
+  m_reg = (m_reg & ~SIGN_OUTPUT_MASK) | out;
+  writeReg(m_reg);
 }
 
 void AD983X::init() {
@@ -54,6 +54,12 @@ void AD983X::init() {
   this->setFrequencyWord(1, 0);
   this->setPhaseWord(0, 0);
   this->setPhaseWord(1, 0);
+}
+
+AD983X::AD983X(byte select_pin, int frequency_mhz) : 
+	m_select_pin(select_pin), m_frequency_mhz(frequency_mhz), m_reg(REG_B28) {
+  digitalWrite(select_pin, HIGH);
+  pinMode(select_pin, OUTPUT);
 }
 
 void AD983X_SW::reset(boolean in_reset) {
