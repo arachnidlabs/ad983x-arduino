@@ -21,8 +21,8 @@
 #define SIGN_OUTPUT_MASK (REG_OPBITEN | REG_SIGNPIB | REG_DIV2 | REG_MODE)
 
 void AD983X::writeReg(uint16_t value) {
-  SPI.setBitOrder(MSBFIRST);
-  SPI.setDataMode(SPI_MODE2);
+  
+  SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE2));
   digitalWrite(m_select_pin, LOW);
   delayMicroseconds(10);
   SPI.transfer(value >> 8);

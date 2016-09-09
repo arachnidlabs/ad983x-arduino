@@ -1,0 +1,39 @@
+
+#######################################
+# Syntax Coloring Map For AD983x
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+AD983X_PIN KEYWORD1
+AD983X_SW KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+setSignOutput KEYWORD2
+setOutputMode KEYWORD2
+
+begin KEYWORD2
+
+selectFrequency KEYWORD2
+selectPhase KEYWORD2
+
+setFrequency KEYWORD2
+setPhase KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+SIGN_OUTPUT_NONE  
+SIGN_OUTPUT_MSB LITERAL1
+SIGN_OUTPUT_MSB_2 LITERAL1
+SIGN_OUTPUT_COMPARATOR LITERAL1
+
+OUTPUT_MODE_SINE LITERAL1
+OUTPUT_MODE_TRIANGLE LITERAL1
+
