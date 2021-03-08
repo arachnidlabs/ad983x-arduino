@@ -19,21 +19,37 @@
 #define REG_MODE    0x0002
 
 #define SIGN_OUTPUT_MASK (REG_OPBITEN | REG_SIGNPIB | REG_DIV2 | REG_MODE)
+#define SLEEP_MASK (REG_SLEEP1 | REG_SLEEP12)
+
+static SPISettings settingsAD(40000000, MSBFIRST, SPI_MODE2);
+
 
 void AD983X::writeReg(uint16_t value) {
-  SPI.setBitOrder(MSBFIRST);
-  SPI.setDataMode(SPI_MODE2);
-  digitalWrite(m_select_pin, LOW);
-  delayMicroseconds(10);
-  SPI.transfer(value >> 8);
-  SPI.transfer(value & 0xFF);
-  delayMicroseconds(10);
-  digitalWrite(m_select_pin, HIGH);
+  SPI.beginTransaction(settingsAD);
+  *m_select_out &= ~m_select_bit;  //Set m_select_pin LOW
+
+  SPI.transfer16(value);
+
+  *m_select_out |= m_select_bit;  //Set m_select_pin HIGH
+  SPI.endTransaction();
 }
 
+
+void AD983X::writeReg2(uint16_t value1, uint16_t value2) {
+  SPI.beginTransaction(settingsAD);
+  *m_select_out &= ~m_select_bit;  //Set m_select_pin LOW
+
+  SPI.transfer16(value1);
+  SPI.transfer16(value2);
+
+  *m_select_out |= m_select_bit;  //Set m_select_pin HIGH
+  SPI.endTransaction();
+}
+
+
 void AD983X::setFrequencyWord(byte reg, uint32_t frequency) {
-  writeReg((reg?REG_FREQ1:REG_FREQ0) | (frequency & 0x3FFF));
-  writeReg((reg?REG_FREQ1:REG_FREQ0) | ((frequency >> 14) & 0x3FFF));
+  uint16_t reg_freq = reg?REG_FREQ1:REG_FREQ0;
+  writeReg2(reg_freq | (frequency & 0x3FFF), reg_freq | ((frequency >> 14) & 0x3FFF));
 }
 
 void AD983X::setPhaseWord(byte reg, uint32_t phase) {
@@ -54,6 +70,11 @@ void AD983X::setOutputMode(OutputMode out) {
   writeReg(m_reg);
 }
 
+void AD983X::setSleep(SleepMode out) {
+  m_reg = (m_reg & ~SLEEP_MASK) | out;
+  writeReg(m_reg & ~REG_PINSW);  // Always per SW
+}
+
 void AD983X::init() {
   SPI.begin();
   writeReg(m_reg);
@@ -67,8 +88,11 @@ void AD983X::init() {
 
 AD983X::AD983X(byte select_pin, int frequency_mhz) : 
 	m_select_pin(select_pin), m_frequency_mhz(frequency_mhz), m_reg(REG_B28) {
-  digitalWrite(select_pin, HIGH);
-  pinMode(select_pin, OUTPUT);
+  uint8_t port = digitalPinToPort(select_pin);
+  m_select_out = portOutputRegister(port);
+  m_select_bit = digitalPinToBitMask(select_pin);
+  digitalWrite(select_pin, HIGH);   // Set it first to HIGH, to avoid small period LOW state
+  pinMode(select_pin, OUTPUT);  
 }
 
 void AD983X_SW::reset(boolean in_reset) {
@@ -81,7 +105,7 @@ void AD983X_SW::reset(boolean in_reset) {
 }
 
 void AD983X_SW::begin() {
-  reset(true);
+  m_reg |= REG_RESET;
   init();
   reset(false);
 }

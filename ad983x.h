@@ -16,6 +16,13 @@ enum OutputMode {
   OUTPUT_MODE_TRIANGLE    = 0x0002,
 };
 
+enum SleepMode {
+  SLEEP_MODE_NONE         = 0x0000,
+  SLEEP_MODE_MCLK         = 0x0080,
+  SLEEP_MODE_DAC          = 0x0040,
+  SLEEP_MODE_ALL          = 0x00C0,
+};
+
 class AD983X {
 public:
   AD983X(byte select_pin, int frequency_mhz);
@@ -23,8 +30,9 @@ public:
   void setPhaseWord(byte reg, uint32_t phase);
   void setSignOutput(SignOutput out);
   void setOutputMode(OutputMode out);
+  void setSleep(SleepMode out);
 
-  inline uint32_t computeFrequencyWord(uint32_t frequency) {
+  inline uint32_t computeFrequencyWord(uint32_t frequency) {  
     // This is a manual expansion of (frequency * 2^28) / m_frequency_mhz
     // Since it doesn't require 64 bit multiplies or divides, it results in
     // substantially smaller code sizes.
@@ -46,10 +54,13 @@ public:
 protected:
   void init();
   void writeReg(uint16_t value);
+  void writeReg2(uint16_t value1, uint16_t value2);
 
   byte m_select_pin;
   int m_frequency_mhz;
   uint16_t m_reg;
+  volatile uint8_t *m_select_out;
+  uint8_t m_select_bit;
 };
 
 class AD983X_PIN : public AD983X {
